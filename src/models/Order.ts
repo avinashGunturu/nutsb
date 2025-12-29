@@ -3,6 +3,8 @@ import { IAddress } from './User';
 
 export interface IOrderItem {
     product: mongoose.Types.ObjectId;
+    variantId?: string; // ID of the specific variant
+    weight?: string;
     quantity: number;
     price: number;
     discountApplied: number;
@@ -36,6 +38,8 @@ const OrderSchema = new Schema<IOrder>(
         items: [
             {
                 product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+                variantId: { type: String },
+                weight: { type: String },
                 quantity: { type: Number, required: true, min: 1 },
                 price: { type: Number, required: true }, // Price at time of purchase
                 discountApplied: { type: Number, default: 0 },

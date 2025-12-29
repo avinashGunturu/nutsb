@@ -5,6 +5,7 @@ import {
     createProduct,
     updateProduct,
     deleteProduct,
+    getProductsWithFilters,
 } from '../controllers/productController';
 import { protect, admin } from '../middleware/authMiddleware';
 
@@ -19,6 +20,7 @@ const router = express.Router();
 
 // Public Routes
 router.get('/', getProducts);
+router.post('/list', getProductsWithFilters); // Advanced filtering and pagination
 router.get('/:id', getProductById);
 
 // Admin Routes

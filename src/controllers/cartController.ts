@@ -25,18 +25,31 @@ export const validateCart = async (req: Request, res: Response) => {
                 continue;
             }
 
-            if (product.stock < item.quantity) {
-                errors.push({ productId: item.productId, error: `Insufficient stock. Only ${product.stock} available.` });
+            // Find specific variant
+            const variant = product.variants.find((v: any) => v._id.toString() === item.variantId);
+
+            if (!variant) {
+                errors.push({ productId: item.productId, error: 'Variant not found' });
+                continue;
+            }
+
+            if (variant.stock < item.quantity) {
+                errors.push({
+                    productId: item.productId,
+                    variantId: item.variantId,
+                    error: `Insufficient stock. Only ${variant.stock} available.`,
+                });
                 continue;
             }
 
             // Use discounted price if available
-            const price = product.discountedPrice || product.price;
+            const price = variant.discountedPrice || variant.price;
             const itemTotal = price * item.quantity;
             subtotal += itemTotal;
 
             validatedItems.push({
                 product,
+                variant,
                 quantity: item.quantity,
                 price,
                 itemTotal,

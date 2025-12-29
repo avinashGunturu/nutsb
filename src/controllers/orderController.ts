@@ -28,18 +28,28 @@ export const initiateCheckout = async (req: Request | any, res: Response) => {
             if (!product) {
                 return sendError(res, `Product not found: ${item.productId}`, 404);
             }
-            if (product.stock < item.quantity) {
-                return sendError(res, `Insufficient stock for ${product.name}`, 400);
+
+            // Find specific variant
+            const variant = product.variants.find((v: any) => v._id.toString() === item.variantId);
+
+            if (!variant) {
+                return sendError(res, `Variant not found for product: ${item.productId}`, 400);
             }
 
-            const price = product.discountedPrice || product.price;
+            if (variant.stock < item.quantity) {
+                return sendError(res, `Insufficient stock for ${product.name} (${variant.weight})`, 400);
+            }
+
+            const price = variant.discountedPrice || variant.price;
             subtotal += price * item.quantity;
 
             orderItems.push({
                 product: product._id,
+                variantId: (variant as any)._id,
+                weight: variant.weight,
                 quantity: item.quantity,
                 price,
-                discountApplied: product.discountedPrice ? product.price - product.discountedPrice : 0,
+                discountApplied: variant.discountedPrice ? variant.price - variant.discountedPrice : 0,
             });
         }
 
