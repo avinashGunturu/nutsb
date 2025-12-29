@@ -3,3 +3,4 @@ dist
 .env
 .DS_Store
 uploads/
+src/config/keys/path-to-your-service-account-key.json

@@ -5,6 +5,6 @@ import { protect, admin } from '../middleware/authMiddleware';
 const router = express.Router();
 
 router.post('/inquiry', submitInquiry);
-router.get('/', protect, admin, getInquiries); // GET /api/wholesale (Prot)
+router.post('/filter', protect, admin, getInquiries); // POST /api/wholesale/filter (Prot)
 
 export default router;
