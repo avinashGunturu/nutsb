@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import Order from '../models/Order';
 import Product from '../models/Product';
 import Transaction from '../models/Transaction';
@@ -74,7 +75,7 @@ export const initiateCheckout = async (req: Request | any, res: Response) => {
         const finalAmount = subtotal - discountAmount;
 
         // 3. Create Local Order (Pending)
-        const orderId = `KC-${Date.now()}`; // Simple ID gen
+        const orderId = `KC-${uuidv4()}`; // UUID based ID
         const newOrder = await Order.create({
             orderId,
             user: userId,
@@ -189,12 +190,57 @@ export const getMyOrders = async (req: Request | any, res: Response) => {
 }
 
 // @desc    Get All Orders (Admin)
-// @route   GET /api/admin/orders
+// @route   POST /api/orders/list
 // @access  Private/Admin
 export const getAllOrders = async (req: Request, res: Response) => {
     try {
-        const orders = await Order.find().populate('user', 'name email').sort({ createdAt: -1 });
-        sendSuccess(res, orders, 'All orders fetched');
+        const {
+            page = 1,
+            limit = 10,
+            status,
+            orderId,
+            startDate,
+            endDate
+        } = req.body;
+
+        const query: any = {};
+
+        // Filter by Status
+        if (status) {
+            query.status = status;
+        }
+
+        // Search by Order ID
+        if (orderId) {
+            query.orderId = { $regex: orderId, $options: 'i' };
+        }
+
+        // Filter by Date Range
+        if (startDate || endDate) {
+            query.createdAt = {};
+            if (startDate) query.createdAt.$gte = new Date(startDate);
+            if (endDate) query.createdAt.$lte = new Date(endDate);
+        }
+
+        const skip = (page - 1) * limit;
+
+        const orders = await Order.find(query)
+            .populate('user', 'name email')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await Order.countDocuments(query);
+
+        sendSuccess(res, {
+            orders,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
+        }, 'All orders fetched');
     } catch (error: any) {
         sendError(res, 'Failed to fetch orders', 500, error.message);
     }
