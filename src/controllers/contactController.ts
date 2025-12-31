@@ -87,3 +87,31 @@ export const getContactRequests = async (req: Request, res: Response) => {
         sendError(res, 'Failed to fetch requests', 500, error.message);
     }
 };
+
+// @desc    Update Contact Request Status
+// @route   PUT /api/contact/:id/status
+// @access  Private/Admin
+export const updateContactStatus = async (req: Request, res: Response) => {
+    try {
+        const { status } = req.body;
+        const validStatuses = ['new', 'read', 'replied', 'resolved'];
+
+        if (!status || !validStatuses.includes(status)) {
+            return sendError(res, 'Invalid status', 400);
+        }
+
+        const contact = await ContactRequest.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        );
+
+        if (!contact) {
+            return sendError(res, 'Contact request not found', 404);
+        }
+
+        sendSuccess(res, contact, 'Status updated successfully');
+    } catch (error: any) {
+        sendError(res, 'Failed to update status', 500, error.message);
+    }
+};

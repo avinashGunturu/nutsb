@@ -7,7 +7,7 @@ export interface IContactRequest extends Document {
     orderId?: string; // User entered Order #
     topic: string;
     message: string;
-    status: 'new' | 'read' | 'replied';
+    status: 'new' | 'read' | 'replied' | 'resolved';
     createdAt: Date;
     updatedAt: Date;
 }
@@ -20,7 +20,7 @@ const ContactRequestSchema = new Schema<IContactRequest>(
         orderId: { type: String },
         topic: { type: String, default: 'General Inquiry' },
         message: { type: String, required: true },
-        status: { type: String, enum: ['new', 'read', 'replied'], default: 'new' },
+        status: { type: String, enum: ['new', 'read', 'replied', 'resolved'], default: 'new' },
     },
     { timestamps: true }
 );
