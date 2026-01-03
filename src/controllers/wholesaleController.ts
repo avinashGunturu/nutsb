@@ -114,3 +114,48 @@ export const getInquiries = async (req: Request, res: Response) => {
         sendError(res, 'Failed to fetch inquiries', 500, error.message);
     }
 };
+
+// @desc    Get Single Wholesale Inquiry by ID
+// @route   GET /api/wholesale/:id
+// @access  Private/Admin
+export const getInquiryById = async (req: Request, res: Response) => {
+    try {
+        const inquiry = await WholesaleInquiry.findById(req.params.id);
+
+        if (!inquiry) {
+            return sendError(res, 'Wholesale inquiry not found', 404);
+        }
+
+        sendSuccess(res, inquiry, 'Wholesale inquiry fetched successfully');
+    } catch (error: any) {
+        sendError(res, 'Failed to fetch inquiry details', 500, error.message);
+    }
+};
+
+// @desc    Update Wholesale Inquiry Status
+// @route   PUT /api/wholesale/:id/status
+// @access  Private/Admin
+export const updateInquiryStatus = async (req: Request, res: Response) => {
+    try {
+        const { status } = req.body;
+        const validStatuses = ['new', 'read', 'replied', 'resolved'];
+
+        if (!validStatuses.includes(status)) {
+            return sendError(res, 'Invalid status', 400);
+        }
+
+        const inquiry = await WholesaleInquiry.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true }
+        );
+
+        if (!inquiry) {
+            return sendError(res, 'Wholesale inquiry not found', 404);
+        }
+
+        sendSuccess(res, inquiry, 'Inquiry status updated successfully');
+    } catch (error: any) {
+        sendError(res, 'Failed to update inquiry status', 500, error.message);
+    }
+};
