@@ -107,7 +107,9 @@ export const getProductsWithFilters = async (req: Request, res: Response) => {
         let query: any = {};
 
         if (typeof isActive !== 'undefined') {
-            query.isActive = isActive;
+            if (isActive !== 'all') {
+                query.isActive = isActive;
+            }
         } else {
             query.isActive = true;
         }

@@ -1,7 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IReview {
-    user: mongoose.Types.ObjectId;
+    user?: mongoose.Types.ObjectId;
+    reviewerName?: string;
     rating: number;
     comment: string;
     date: Date;
@@ -77,6 +78,7 @@ const ProductSchema = new Schema<IProduct>(
         reviews: [
             {
                 user: { type: Schema.Types.ObjectId, ref: 'User' },
+                reviewerName: { type: String },
                 rating: { type: Number, required: true },
                 comment: { type: String },
                 date: { type: Date, default: Date.now },
