@@ -211,3 +211,32 @@ export const getCustomerById = async (req: Request, res: Response) => {
         sendError(res, 'Failed to fetch customer details', 500, error.message);
     }
 };
+
+// @desc    Get Customers by IDs
+// @route   POST /api/admin/customers/by-ids
+// @access  Private/Admin
+export const getCustomersByIds = async (req: Request, res: Response) => {
+    try {
+        const { userIds } = req.body;
+
+        if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
+            return sendError(res, 'userIds array is required', 400);
+        }
+
+        const customers = await User.find({ _id: { $in: userIds } })
+            .select('_id name email phone')
+            .lean();
+
+        const formattedCustomers = customers.map((c: any) => ({
+            _id: c._id,
+            name: c.name || '',
+            email: c.email || '',
+            phone: c.phone || ''
+        }));
+
+        sendSuccess(res, { customers: formattedCustomers }, 'Customers fetched successfully');
+
+    } catch (error: any) {
+        sendError(res, 'Failed to fetch customers', 500, error.message);
+    }
+};

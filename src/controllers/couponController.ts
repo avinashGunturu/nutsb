@@ -185,3 +185,49 @@ export const getCoupons = async (req: Request, res: Response) => {
         sendError(res, 'Failed to fetch coupons', 500, error.message);
     }
 };
+
+// @desc    Update Coupon
+// @route   PUT /api/coupons/:id
+// @access  Private/Admin
+export const updateCoupon = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const updateData = req.body;
+
+        // Remove fields that shouldn't be updated directly
+        delete updateData._id;
+        delete updateData.usedCount;
+        delete updateData.createdAt;
+        delete updateData.updatedAt;
+        delete updateData.__v;
+
+        // If code is being updated, check for duplicates
+        if (updateData.code) {
+            const existingCoupon = await Coupon.findOne({
+                code: updateData.code.toUpperCase(),
+                _id: { $ne: id }
+            });
+            if (existingCoupon) {
+                return sendError(res, 'Coupon code already exists', 400);
+            }
+            updateData.code = updateData.code.toUpperCase();
+        }
+
+        const coupon = await Coupon.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        if (!coupon) {
+            return sendError(res, 'Coupon not found', 404);
+        }
+
+        sendSuccess(res, coupon, 'Coupon updated successfully');
+    } catch (error: any) {
+        if (error.code === 11000) {
+            return sendError(res, 'Coupon code already exists', 400);
+        }
+        sendError(res, 'Failed to update coupon', 500, error.message);
+    }
+};

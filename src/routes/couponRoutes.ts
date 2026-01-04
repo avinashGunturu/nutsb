@@ -1,5 +1,5 @@
 import express from 'express';
-import { applyCoupon, createCoupon, getCoupons, updateCouponStatus } from '../controllers/couponController';
+import { applyCoupon, createCoupon, getCoupons, updateCouponStatus, updateCoupon } from '../controllers/couponController';
 import { protect, admin } from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -17,6 +17,7 @@ router.post('/apply', protect, applyCoupon);
 // Admin
 router.post('/', protect, admin, createCoupon);
 router.post('/list', protect, admin, getCoupons);
+router.put('/:id', protect, admin, updateCoupon);
 router.put('/:id/status', protect, admin, updateCouponStatus);
 
 export default router;
